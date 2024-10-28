@@ -1,0 +1,18 @@
+# Crear un cluster
+aws ecs create-cluster --cluster-name my-web-app-cluster
+
+# Crear una definición de tarea (suponiendo un archivo task-definition.json)
+aws ecs register-task-definition --cli-input-json file://task-definition.json
+
+# Crear un servicio
+aws ecs create-service --cluster my-web-app-cluster --service-name my-service --task-definition my-task:4 --desired-count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[$submet_id],securityGroups=[$sg],assignPublicIp=ENABLED}"
+
+# Proceso de eliminación de todo
+aws ecs update-service --cluster my-web-app-cluster --service my-service --desired-count 0
+aws ecs delete-service --cluster my-web-app-cluster --service my-service
+
+aws ecs list-task-definitions
+aws ecs deregister-task-definition --task-definition my-task:1
+aws ecs delete-task-definitions --task-definitions my-task:1
+
+aws ecs delete-cluster --cluster my-web-app-cluster

@@ -1,0 +1,54 @@
+# Instalación del cliente de Kubernetes
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+mv kubectl /usr/local/bin
+
+# Instalación del cliente de eksctl
+curl -LO https://github.com/eksctl-io/eksctl/releases/download/v0.190.0/eksctl_Linux_amd64.tar.gz --insecure
+tar -xzf eksctl_Linux_amd64.tar.gz
+
+mv eksctl /usr/local/bin
+
+# Creación del cluster
+eksctl create cluster --name=my-eks-cluster2 \
+                      --region=eu-north-1 \
+                      --zones=eu-north-1a,eu-north-1b \
+                      --without-nodegroup 
+			
+# Asignación de permisos		  
+eksctl utils associate-iam-oidc-provider \
+    --region eu-north-1 \
+    --cluster my-eks-cluster3 \
+    --approve
+
+# Creación de certificados SSL
+ssh-keygen	
+				
+# Creación del grupo de nodos	  
+eksctl create nodegroup --cluster=my-eks-cluster3 \
+                        --region=eu-north-1 \
+                        --name=my-eks-nodegroup \
+                        --node-type=t3.medium \
+                        --nodes=2 \
+                        --nodes-min=2 \
+                        --nodes-max=2 \
+                        --node-volume-size=20 \
+                        --ssh-access \
+                        --managed \
+                        --asg-access \
+                        --external-dns-access \
+                        --full-ecr-access \
+                        --appmesh-access \
+                        --alb-ingress-access 
+  
+# Nuestro primer despliegue en Kubernetes
+kubectl create deployment my-deployment --image=nginx
+
+# Exponiendo el servício de nuestro primer despliegue
+kubectl expose deployment my-deployment --type=LoadBalancer --port 80 --target-port 80
+
+# Eliminación del grupo de nodos
+eksctl delete nodegroup --cluster my-eks-cluster3 --name my-eks-nodegroup
+
+# Eliminación del cluster de kubernetes
+eksctl delete cluster --name my-eks-cluster3

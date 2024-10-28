@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Resources:
+
+  HelloFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: handler.getHello
+      Runtime: nodejs16.x
+      CodeUri: ./saludo
+      Events:
+        HelloAPI:
+          Type: Api
+          Properties:
+            Path: /saludo
+            Method: GET
+
+Outputs:
+  MyApi:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/saludo/"
